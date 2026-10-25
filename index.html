@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>金钱人格测试 · 3分钟测出你的金钱DNA</title>
+<!-- 超库(Supabase)连接库 — 部署前请在下方JS中填入你的项目URL和公钥 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #FFF6EC;
+    --bg-soft: #FFFBF3;
+    --card: #FFFFFF;
+    --ink: #3A2614;
+    --ink-soft: #6B5340;
+    --muted: #A89078;
+    --rule: #F3E4CC;
+    --accent: #D97706;
+    --accent-deep: #B45309;
+    --accent2: #C2410C;
+    --accent2-soft: #FB923C;
+    --gold: #F59E0B;
+    --green: #16A34A;
+    --shadow: 0 8px 32px rgba(180, 120, 30, 0.12);
+    --shadow-hover: 0 12px 40px rgba(180, 120, 30, 0.22);
+    --radius: 24px;
+    --radius-sm: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: 'Nunito', 'Quicksand', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* 背景装饰：浮动的暖色小元素 */
+  .bg-deco {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+  .deco-1 { top: 8%; left: 5%; font-size: 2.2rem; animation: float 6s ease-in-out infinite; }
+  .deco-2 { top: 15%; right: 8%; font-size: 1.8rem; animation: float 7s ease-in-out infinite 0.5s; }
+  .deco-3 { bottom: 12%; left: 8%; font-size: 2rem; animation: float 5.5s ease-in-out infinite 1s; }
+  .deco-4 { bottom: 20%; right: 6%; font-size: 2.4rem; animation: float 6.5s ease-in-out infinite 0.3s; }
+  .deco-5 { top: 45%; left: 3%; font-size: 1.5rem; animation: float 8s ease-in-out infinite 0.8s; }
+  .deco-6 { top: 50%; right: 3%; font-size: 1.6rem; animation: float 7.5s ease-in-out infinite 1.2s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-18px) rotate(8deg); }
+  }
+
+  /* 主容器 */
+  .app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+  }
+
+  /* 通用卡片 */
+  .screen {
+    width: 100%;
+    max-width: 520px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 36px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .screen.hidden {
+    display: none;
+  }
+
+  .screen.fade-out {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+
+  .screen.fade-in {
+    animation: fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ===== 开始页 ===== */
+  .start-screen {
+    text-align: center;
+  }
+
+  .start-emoji {
+    font-size: 4.5rem;
+    margin-bottom: 8px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .start-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-deep);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+
+  .start-subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  .start-desc {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+    line-height: 1.8;
+    padding: 0 8px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .info-badge {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    color: var(--accent-deep);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);
+  }
+
+  .start-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    border: none;
+    padding: 16px 56px;
+    border-radius: 999px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(194, 65, 12, 0.35);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 1px;
+  }
+
+  .start-btn:hover, .start-btn:active {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 28px rgba(194, 65, 12, 0.45);
+  }
+
+  .start-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .start-footer {
+    margin-top: 24px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ===== 答题页 ===== */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-deep);
+  }
+
+  .progress-bar-wrap {
+    width: 100%;
+    height: 10px;
+    background: var(--rule);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2-soft));
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 0%;
+  }
+
+  .q-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .q-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .q-opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--bg-soft);
+    border: 2px solid var(--rule);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    font-size: 0.98rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.22s ease;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+
+  .q-opt:hover {
+    border-color: var(--accent);
+    background: #FFF8EE;
+    transform: translateX(4px);
+  }
+
+  .q-opt.selected {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, #FFF3E0, #FFE8D0);
+    color: var(--accent-deep);
+    font-weight: 700;
+  }
+
+  .q-opt.correct-flash {
+    animation: flashSel 0.4s ease;
+  }
+
+  @keyframes flashSel {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); background: #FFE0B2; }
+    100% { transform: scale(1); }
+  }
+
+  /* 题目切换动画 */
+  .quiz-content {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .quiz-content.slide-out {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  .quiz-content.slide-in {
+    animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ===== 结果页 ===== */
+  .result-screen {
+    text-align: center;
+  }
+
+  .result-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    padding: 6px 20px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .result-emoji {
+    font-size: 5rem;
+    margin-bottom: 8px;
+    animation: bounce 2.5s ease-in-out infinite;
+  }
+
+  .result-type-code {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+
+  .result-type-name {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--accent-deep);
+    margin-bottom: 6px;
+  }
+
+  .result-tagline {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+
+  .result-section {
+    text-align: left;
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    border-left: 4px solid var(--accent);
+  }
+
+  .result-section h4 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--accent-deep);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .result-section p {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+
+  .result-section.advice {
+    border-left-color: var(--green);
+  }
+  .result-section.advice h4 { color: var(--green); }
+
+  .dim-scores {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .dim-score-item {
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+
+  .dim-score-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .dim-score-value {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--accent-deep);
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    flex: 1;
+    min-width: 130px;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    box-shadow: 0 4px 14px rgba(194, 65, 12, 0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(194, 65, 12, 0.4); }
+
+  .btn-secondary {
+    background: var(--bg-soft);
+    color: var(--accent-deep);
+    border: 2px solid var(--rule);
+  }
+  .btn-secondary:hover { border-color: var(--accent); background: #FFF8EE; transform: translateY(-2px); }
+
+  /* 分享提示 */
+  .share-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(58, 38, 20, 0.92);
+    color: white;
+    padding: 16px 28px;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+  }
+  .share-toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* 撒花特效 */
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 100;
+    animation: confettiFall 3s linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* 响应式 */
+  @media (max-width: 480px) {
+    .screen { padding: 28px 20px; border-radius: 20px; }
+    .start-title { font-size: 1.6rem; }
+    .start-emoji { font-size: 3.5rem; }
+    .result-type-name { font-size: 1.7rem; }
+    .result-emoji { font-size: 4rem; }
+    .q-text { font-size: 1.05rem; }
+    .q-opt { padding: 14px 16px; font-size: 0.92rem; }
+    .info-row { gap: 8px; }
+    .info-badge { padding: 6px 12px; font-size: 0.78rem; }
+  }
+
+  @media (min-width: 768px) {
+    .screen { max-width: 560px; padding: 44px 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 背景装饰 -->
+<div class="bg-deco deco-1">💰</div>
+<div class="bg-deco deco-2">🪙</div>
+<div class="bg-deco deco-3">✨</div>
+<div class="bg-deco deco-4">💸</div>
+<div class="bg-deco deco-5">🌟</div>
+<div class="bg-deco deco-6">💎</div>
+
+<div class="app">
+
+  <!-- ========== 开始页 ========== -->
+  <section id="startScreen" class="screen start-screen fade-in">
+    <div class="start-emoji">💰</div>
+    <h1 class="start-title">金钱人格测试</h1>
+    <p class="start-subtitle">3分钟测出你的金钱DNA ✨</p>
+    <p class="start-desc">
+      你是守财军师还是月光骑士？是投资冒险家还是快乐社交王？<br>
+      通过20道生活情境题，发现你独特的金钱人格，找到最适合你的理财方式。
+    </p>
+    <div class="info-row">
+      <span class="info-badge">📝 20道题</span>
+      <span class="info-badge">⏱️ 约3分钟</span>
+      <span class="info-badge">🔮 16种人格</span>
+      <span class="info-badge">💯 完全免费</span>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">开始测试 →</button>
+    <p class="start-footer">数据仅保存在你的设备上，不会上传任何服务器</p>
+  </section>
+
+  <!-- ========== 答题页 ========== -->
+  <section id="quizScreen" class="screen hidden">
+    <div class="quiz-header">
+      <span class="progress-label" id="progressLabel">第 1 / 20 题</span>
+      <span class="progress-label" id="progressPercent">5%</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="quiz-content" id="quizContent"></div>
+  </section>
+
+  <!-- ========== 结果页 ========== -->
+  <section id="resultScreen" class="screen hidden">
+    <div id="resultContent"></div>
+  </section>
+
+</div>
+
+<div class="share-toast" id="shareToast">结果已复制到剪贴板 📋</div>
+
+<script>
+/* ===================== 题库数据 ===================== */
+const questions = [
+  /* 维度0: 消费决策 P(左) / S(右) */
+  { dim: 0, text: "这个月刚到账的生活费/工资比平时多了2000元意外收入，你的第一反应是？",
+    options: ["立刻列清单，规划这笔钱怎么分配", "先放着，等需要时再说", "马上看看有什么想买的，犒劳自己"] },
+  { dim: 0, text: "你在网上看中一件约800元的衣服，但不在预算内，你会？",
+    options: ["加入收藏，等降价或攒够钱再买", "纠结几天后还是买了", "直接下单，喜欢就买"] },
+  { dim: 0, text: "朋友突然约你去人均500元的聚餐，你当月预算已所剩不多，你会？",
+    options: ["找借口推掉，不想超支", "去，但接下来几天省着花", "去，开心最重要，钱的事之后再说"] },
+  { dim: 0, text: "你上一次\"买完就后悔\"的消费发生在？",
+    options: ["几乎没有，买东西都很慎重", "半年内有过一两次", "经常，差不多每个月都有"] },
+  { dim: 0, text: "回想过去三个月，你的消费中有多少是\"计划外\"的？",
+    options: ["不到10%，基本都在计划内", "大概30%，偶尔冲动", "超过50%，大部分都是临时决定"] },
+
+  /* 维度1: 风险偏好 R(左) / A(右) */
+  { dim: 1, text: "你有1万元可投资，两种选择：A保本赚200元；B有70%概率赚3000元但30%概率亏2000元。你选？",
+    options: ["选A，稳稳赚200", "拿不准，可能各投一半", "选B，搏一把高收益"] },
+  { dim: 1, text: "你买的基金一个月内跌了15%，你会？",
+    options: ["立刻赎回，避免亏更多", "先观察一段时间再说", "加仓，现在是抄底好机会"] },
+  { dim: 1, text: "你能接受的最大投资亏损比例是多少？",
+    options: ["不能接受亏损，本金必须安全", "最多亏10%，再多就受不了", "可接受亏30%以上，高风险高回报"] },
+  { dim: 1, text: "朋友推荐一个\"大概率翻倍\"的投资机会，但你不太了解这个领域，你会？",
+    options: ["不参与，不懂的不碰", "小投一点试试水", "多投一些，相信朋友的判断"] },
+  { dim: 1, text: "你目前的闲置资金中，有多少在做有风险的投资（股票/基金/加密货币等）？",
+    options: ["0%，全部在存款/货币基金", "20-40%左右", "超过50%，大部分在做投资"] },
+
+  /* 维度2: 价值取向 U(左) / E(右) */
+  { dim: 2, text: "你有500元预算给自己买生日礼物，你更可能选？",
+    options: ["一件质量好、能用很久的实用物品", "纠结，实用的和想要的都想买", "一次难忘的体验（演唱会/旅行/米其林）"] },
+  { dim: 2, text: "双十一打折，你最可能囤的是？",
+    options: ["日用品、消耗品（纸巾、洗衣液等）", "看情况，有用的和想要的都买", "平时舍不得买的\"快乐消费\"（游戏、盲盒、化妆品）"] },
+  { dim: 2, text: "你花钱时更常想的是？",
+    options: ["\"这东西值不值这个价\"", "\"既要看值不值，也要看开不开心\"", "\"能让我开心就值\""] },
+  { dim: 2, text: "过去一年，你在\"体验型消费\"（旅行、演出、美食、课程等）上花的钱占总消费的？",
+    options: ["不到15%，主要花在实物上", "大概30%左右", "超过50%，体验比实物重要"] },
+  { dim: 2, text: "你觉得\"花钱买教训\"这句话？",
+    options: ["不认同，钱要花在刀刃上", "有些时候不得不交学费", "很正常，体验本身就是收获"] },
+
+  /* 维度3: 社交金钱 I(左) / C(右) */
+  { dim: 3, text: "和几个朋友出去吃饭，结账时你最希望？",
+    options: ["严格AA，各付各的，清清楚楚", "这次我请，下次他请，轮流来", "谁钱多谁多付点，不用算太清楚"] },
+  { dim: 3, text: "朋友向你借2000元，说下个月还，你会？",
+    options: ["婉拒，不太喜欢借钱给别人", "借，但会提醒还款时间", "借，朋友有困难应该帮"] },
+  { dim: 3, text: "家人提出想和你合用一张会员卡/共享某个付费服务，你会？",
+    options: ["不太愿意，钱和账要分开", "可以，但要把费用算清楚", "没问题，一家人不用分那么清"] },
+  { dim: 3, text: "你觉得\"谈钱伤感情\"这句话？",
+    options: ["不认同，把钱说清楚反而不伤感情", "看情况，有些时候确实尴尬", "认同，朋友之间算太清楚就生分了"] },
+  { dim: 3, text: "过去半年，你为朋友/家人花的钱（请客、送礼、垫付等）大概？",
+    options: ["很少，基本各花各的", "有一些，但不会太多", "不少，我喜欢为身边人花钱"] }
+];
+
+/* ===================== 人格类型数据 ===================== */
+const dimNames = ["消费决策", "风险偏好", "价值取向", "社交金钱"];
+const poleLabels = [
+  { left: "P 规划型", right: "S 即兴型" },
+  { left: "R 稳健型", right: "A 进取型" },
+  { left: "U 实用型", right: "E 体验型" },
+  { left: "I 独立型", right: "C 共享型" }
+];
+
+const types = {
+  "PRUI": { name: "守财军师", emoji: "🏦", tagline: "精打细算的独立理财者",
+    core: "你是天生的理财规划师，花钱有计划、投资求稳健、重视物品的实用价值，在金钱关系上习惯独立。每一分钱都花得明明白白。",
+    strength: "自律性强，善于规划和积累，很少冲动消费，财务状况通常很健康。",
+    blind: "可能过于保守，错过一些投资机会；对自己和他人都可能过于'抠'，影响生活品质和人际关系。",
+    advice: "建议拿出收入的10%作为'快乐基金'，专门用于体验型消费，平衡财务健康与生活幸福感。" },
+  "PRUC": { name: "家庭账房", emoji: "🏠", tagline: "把钱花在刀刃上的守护者",
+    core: "你规划清晰、投资稳健、看重实用，同时愿意为家人朋友花钱。你是家里的'财政大臣'，用金钱守护所爱之人。",
+    strength: "家庭责任感强，善于平衡储蓄与付出，是值得信赖的理财者。",
+    blind: "可能因为过度为他人着想而忽视自己的需求；在投资上偏保守，收益增长较慢。",
+    advice: "每月固定给自己留一笔'自我奖励'预算，同时可以尝试学习一些低风险的理财方式来让资产增值。" },
+  "PREI": { name: "品质管家", emoji: "🏺", tagline: "精打细算的独立品质派",
+    core: "你有规划、求稳健，但愿意为高品质体验买单，在金钱上保持独立。你信奉'钱要花在值得的地方'。",
+    strength: "消费观成熟，懂得区分'值得'与'不值得'，既能存钱也能享受生活。",
+    blind: "对品质的高要求可能让你在部分消费上'下不去手'，偶尔需要放松标准。",
+    advice: "设定'品质消费上限'，在限额内可以放心享受，同时保持整体财务规划的稳定。" },
+  "PREC": { name: "生活规划师", emoji: "🌅", tagline: "规划生活也规划享受",
+    core: "你规划有序、投资稳健、看重体验，也乐于为他人花钱。你是把生活过成诗的理财高手。",
+    strength: "财务规划能力强，懂得平衡储蓄、投资和享受，人际关系也因你的慷慨而融洽。",
+    blind: "容易在'体验'和'为他人'上超支，需要注意控制总预算。",
+    advice: "为体验型消费和社交支出分别设定月度上限，在享受生活的同时守住财务安全线。" },
+  "PAUI": { name: "精明玩家", emoji: "🎲", tagline: "敢于冒险的独立实用派",
+    core: "你有消费规划但愿意承担投资风险，看重实用性，金钱上独立自主。你是'该省省该花花'的典型。",
+    strength: "投资视野开阔，敢于把握机会，消费理性，有较高的财富增长潜力。",
+    blind: "风险偏好较高，可能在投资上遭受较大损失；有时过于独立，不愿寻求专业建议。",
+    advice: "设定投资止损线（如-15%），同时在重大投资决策前咨询专业人士，平衡冒险与安全。" },
+  "PAUC": { name: "共赢操盘手", emoji: "🤝", tagline: "敢于冒险的人际理财者",
+    core: "你有规划、敢冒险、重实用，同时愿意与人共享金钱。你相信'钱生钱，也生人'。",
+    strength: "商业嗅觉敏锐，善于合作和资源整合，有成为创业者的潜质。",
+    blind: "可能因冒险投资和人际支出双重压力导致资金紧张；需警惕合作中的财务风险。",
+    advice: "将个人资金与合作资金严格分离，投资前做好风险评估，确保不影响基本生活。" },
+  "PAEI": { name: "投资艺术家", emoji: "🎨", tagline: "把投资当艺术的体验派",
+    core: "你有规划、敢冒险、追求体验、金钱独立。你把理财视为一种创造，既追求收益也享受过程。",
+    strength: "投资眼光独特，敢于尝试新事物，懂得享受生活，财务思维活跃。",
+    blind: "容易因追求'有趣'而投资高风险项目；体验型消费可能侵蚀投资本金。",
+    advice: "区分'投资账户'和'体验账户'，投资部分保持纪律性，体验部分在限额内尽情享受。" },
+  "PAEC": { name: "体验投资人", emoji: "🚀", tagline: "冒险与享受的平衡大师",
+    core: "你有规划、敢冒险、重体验、乐分享。你相信钱是用来创造价值和美好回忆的。",
+    strength: "积极进取，乐于分享，生活丰富多彩，有较强的财富创造能力。",
+    blind: "风险承受和消费意愿都高，容易出现资金链紧张；需要警惕过度乐观。",
+    advice: "建立3-6个月的紧急备用金，在此基础上再进行冒险投资和体验消费。" },
+  "SRUI": { name: "谨慎独行侠", emoji: "🦊", tagline: "随性却谨慎的独立观察者",
+    core: "你消费偏即兴但投资稳健，看重实用，金钱上独立自主。你是'看起来随性，实则谨慎'的类型。",
+    strength: "生活不刻板，投资不冒险，财务安全性高，不容易被他人影响。",
+    blind: "即兴消费可能蚕食储蓄；过于独立可能错过合作机会。",
+    advice: "为即兴消费设置'娱乐预算'，每月固定金额，花完即止，避免影响储蓄目标。" },
+  "SRUC": { name: "贴心守护人", emoji: "🛡️", tagline: "随性温暖的稳健守护者",
+    core: "你消费即兴但投资求稳，看重实用，愿意为他人付出。你是朋友眼中最靠谱的那个人。",
+    strength: "为人慷慨，投资稳健，人际关系良好，生活有温度。",
+    blind: "即兴消费和人际支出可能让储蓄计划受挫；需要学会说'不'。",
+    advice: "制定'付出预算'，每月固定金额用于请客送礼，超支时温柔拒绝，保护自己的财务健康。" },
+  "SREI": { name: "随性品质派", emoji: "🍷", tagline: "随心而动的品质生活家",
+    core: "你消费即兴、投资稳健、追求品质体验、金钱独立。你信奉'活在当下，但不赌未来'。",
+    strength: "懂得享受生活，投资不冒进，个人生活品质较高。",
+    blind: "即兴的品质消费可能让存不下钱；财务规划意识有待加强。",
+    advice: "采用'先存后花'策略，工资到账先转30%到储蓄账户，剩下的再自由支配。" },
+  "SREC": { name: "温暖分享家", emoji: "☕", tagline: "随性温暖的生活艺术家",
+    core: "你消费即兴、投资稳健、重体验、乐分享。你把钱花在让自己和他人都开心的事情上。",
+    strength: "人际关系融洽，生活充满乐趣，投资不冒进，整体幸福感高。",
+    blind: "储蓄率可能偏低；需要警惕体验和社交消费的累积效应。",
+    advice: "设定年度储蓄目标，将体验和社交支出控制在收入的40%以内，兼顾当下快乐与未来安全。" },
+  "SAUI": { name: "机会猎手", emoji: "🎯", tagline: "敢于冒险的独立行动派",
+    core: "你消费即兴、投资敢冒险、看重实用、金钱独立。你是嗅到机会就立刻行动的人。",
+    strength: "行动力强，敢于冒险，有较高的财富增长潜力，不被他人左右。",
+    blind: "容易冲动消费+冲动投资双重出击，可能面临较大财务风险。",
+    advice: "建立'冷静期'制度：超过500元的消费和投资决策，强制等待24小时再执行。" },
+  "SAUC": { name: "资源整合者", emoji: "🌐", tagline: "冒险社交的实用主义者",
+    core: "你消费即兴、敢冒险、重实用、乐分享。你善于把人和钱都调动起来创造价值。",
+    strength: "社交能力强，敢于投资，善于整合资源，有创业和人脉变现潜力。",
+    blind: "可能因冒险和社交导致财务波动大；需要建立财务安全网。",
+    advice: "优先建立6个月紧急备用金，再进行冒险投资；社交支出设置月度上限。" },
+  "SAEI": { name: "灵感冒险家", emoji: "🎭", tagline: "追求刺激的独立梦想家",
+    core: "你消费即兴、敢冒险、重体验、金钱独立。你把生活当成一场冒险，钱是冒险的燃料。",
+    strength: "创造力强，敢于尝试，生活丰富多彩，有独特的人生体验。",
+    blind: "储蓄率低，抗风险能力弱；容易陷入'赚得多花得更多'的循环。",
+    advice: "强制储蓄20%到独立账户（设置自动转账），剩余资金再用于冒险和体验。" },
+  "SAEC": { name: "快乐社交王", emoji: "🎉", tagline: "用金钱创造快乐的社交达人",
+    core: "你消费即兴、敢冒险、重体验、乐分享。你是人群中的开心果，钱是你连接世界的方式。",
+    strength: "人格魅力强，社交圈广，生活充满活力和快乐。",
+    blind: "最容易超支和月光的类型；需要警惕借贷消费和冲动投资。",
+    advice: "采用'信封预算法'，将工资分成储蓄、生活、社交三个账户，社交账户花完即止。" }
+};
+
+/* ===================== 超库(Supabase)配置 ===================== */
+/* ⚠️ 部署前请把下面两行替换成你自己的超库信息（教程里有详细说明） */
+const SUPABASE_URL = 'https://你的项目id.supabase.co';
+const SUPABASE_ANON_KEY = '你的anon公钥';
+let supabaseClient = null;
+try {
+  if (window.supabase && SUPABASE_URL.indexOf('你的项目id') === -1) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch(e) { console.log('超库未配置，数据不会上传（仅本地运行）'); }
+
+async function saveResultToSupabase(code, dimScores) {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('test_results')
+      .insert([{
+        personality_type: code,
+        dim_scores: dimScores,
+        created_at: new Date().toISOString()
+      }]);
+    if (error) console.log('上报失败(可能是未配置超库):', error.message);
+  } catch(e) { /* 静默失败，不影响用户体验 */ }
+}
+
+/* ===================== 核心逻辑 ===================== */
+let currentQ = 0;
+let scores = [0, 0, 0, 0]; // 4个维度的得分
+let answers = [];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  const el = document.getElementById(id);
+  el.classList.remove('hidden');
+  el.classList.remove('fade-out');
+  el.classList.add('fade-in');
+  setTimeout(() => el.classList.remove('fade-in'), 600);
+}
+
+function startQuiz() {
+  currentQ = 0;
+  scores = [0, 0, 0, 0];
+  answers = [];
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const content = document.getElementById('quizContent');
+
+  content.classList.remove('slide-in');
+  content.classList.add('slide-out');
+
+  setTimeout(() => {
+    const optHtml = q.options.map((opt, i) =>
+      `<button class="q-opt" onclick="selectOption(${i})">${String.fromCharCode(65+i)}. ${opt}</button>`
+    ).join('');
+
+    content.innerHTML = `
+      <p class="q-text">${q.text}</p>
+      <div class="q-options">${optHtml}</div>
+    `;
+
+    content.classList.remove('slide-out');
+    content.classList.add('slide-in');
+
+    // 更新进度
+    const pct = Math.round(((currentQ + 1) / questions.length) * 100);
+    document.getElementById('progressLabel').textContent = `第 ${currentQ + 1} / ${questions.length} 题`;
+    document.getElementById('progressPercent').textContent = pct + '%';
+    document.getElementById('progressBar').style.width = pct + '%';
+
+    setTimeout(() => content.classList.remove('slide-in'), 450);
+  }, 250);
+}
+
+function selectOption(idx) {
+  const q = questions[currentQ];
+  // A=5, B=3, C=1
+  const score = [5, 3, 1][idx];
+  scores[q.dim] += score;
+  answers.push(idx);
+
+  // 选中动画
+  const opts = document.querySelectorAll('.q-opt');
+  opts[idx].classList.add('selected', 'correct-flash');
+
+  // 自动切换下一题
+  setTimeout(() => {
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 500);
+}
+
+function showResult() {
+  // 计算4个维度的极点
+  const poles = scores.map(s => s >= 15);
+  const code = poles.map((isLeft, i) => {
+    const left = poleLabels[i].left.split(' ')[0];
+    const right = poleLabels[i].right.split(' ')[0];
+    return isLeft ? left : right;
+  }).join('');
+
+  const type = types[code];
+  // 把结果上报到超库（静默执行，失败不影响页面）
+  saveResultToSupabase(code, scores.slice());
+  const dimDetails = scores.map((s, i) => {
+    const isLeft = s >= 15;
+    return {
+      name: dimNames[i],
+      score: s,
+      label: isLeft ? poleLabels[i].left : poleLabels[i].right
+    };
+  });
+
+  const dimScoresHtml = dimDetails.map(d => `
+    <div class="dim-score-item">
+      <div class="dim-score-label">${d.name}</div>
+      <div class="dim-score-value">${d.label} (${d.score}/25)</div>
+    </div>
+  `).join('');
+
+  document.getElementById('resultContent').innerHTML = `
+    <div class="result-badge">你的金钱人格</div>
+    <div class="result-emoji">${type.emoji}</div>
+    <div class="result-type-code">${code}</div>
+    <h2 class="result-type-name">${type.name}</h2>
+    <p class="result-tagline">「${type.tagline}」</p>
+
+    <div class="dim-scores">${dimScoresHtml}</div>
+
+    <div class="result-section">
+      <h4>💡 核心特征</h4>
+      <p>${type.core}</p>
+    </div>
+    <div class="result-section">
+      <h4>✨ 你的优势</h4>
+      <p>${type.strength}</p>
+    </div>
+    <div class="result-section">
+      <h4>⚠️ 需要注意</h4>
+      <p>${type.blind}</p>
+    </div>
+    <div class="result-section advice">
+      <h4>🌱 专属理财建议</h4>
+      <p>${type.advice}</p>
+    </div>
+
+    <div class="result-actions">
+      <button class="action-btn btn-primary" onclick="shareResult()">📤 分享结果</button>
+      <button class="action-btn btn-secondary" onclick="restart()">🔄 重新测试</button>
+    </div>
+  `;
+
+  showScreen('resultScreen');
+  launchConfetti();
+}
+
+function shareResult() {
+  const code = scores.map((s, i) => s >= 15 ? poleLabels[i].left.split(' ')[0] : poleLabels[i].right.split(' ')[0]).join('');
+  const type = types[code];
+  const text = `我的金钱人格是「${type.name} ${type.emoji}」(${code})\n${type.tagline}\n\n快来测测你的金钱人格吧！💰`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('结果已复制到剪贴板 📋'));
+  } else if (navigator.share) {
+    navigator.share({ title: '金钱人格测试', text }).catch(() => showToast('分享已取消'));
+  } else {
+    showToast('长按文字即可复制分享 📋');
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('shareToast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function restart() {
+  showScreen('startScreen');
+}
+
+function launchConfetti() {
+  const colors = ['#D97706', '#C2410C', '#F59E0B', '#FB923C', '#B45309'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = Math.random() * 0.5 + 's';
+      c.style.width = (6 + Math.random() * 8) + 'px';
+      c.style.height = c.style.width;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3500);
+    }, i * 30);
+  }
+}
+</script>
+
+
+</body></html>
