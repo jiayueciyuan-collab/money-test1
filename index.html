@@ -678,8 +678,8 @@ const types = {
 
 /* ===================== 超库(Supabase)配置 ===================== */
 /* ⚠️ 部署前请把下面两行替换成你自己的超库信息（教程里有详细说明） */
-const SUPABASE_URL = 'https://你的项目id.supabase.co';
-const SUPABASE_ANON_KEY = '你的anon公钥';
+const SUPABASE_URL = 'https://imczakamhfliwcjztwxr.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltY3pha2FtaGZsaXdjanp0d3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5MzU2NDEsImV4cCI6MjEwODUxMTY0MX0.z_2wNHJ8kwaKcsg_ufS6oMpan6Rbm4J3q2Zsqzp2RKo';
 let supabaseClient = null;
 try {
   if (window.supabase && SUPABASE_URL.indexOf('你的项目id') === -1) {
